@@ -393,7 +393,7 @@ public class SelectBuilder extends AbstractBuilder<SelectBuilder> {
         if (!conditions.isEmpty()) {
             statement.add("WHERE");
             whereCondition = new CompositeCondition("AND", conditions);
-            statement.add(whereCondition.toSql());
+            statement.add(whereCondition.toSql(dialect));
         }
 
         if (!groupColumns.isEmpty()) {
@@ -401,7 +401,7 @@ public class SelectBuilder extends AbstractBuilder<SelectBuilder> {
         }
 
         if (havingCondition != null) {
-            statement.add("HAVING").add(havingCondition.toSql());
+            statement.add("HAVING").add(havingCondition.toSql(dialect));
         }
 
         if (!orderColumns.isEmpty()) {

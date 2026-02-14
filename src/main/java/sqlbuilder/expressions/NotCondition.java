@@ -13,8 +13,8 @@ public class NotCondition implements Condition {
     }
 
     @Override
-    public String toSql() {
-        return "NOT " + condition.toSql();
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
+        return "NOT " + condition.toSql(dialect);
     }
 
     @Override

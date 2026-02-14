@@ -13,8 +13,12 @@ public class ColumnOperand implements Operand {
     }
 
     @Override
-    public String toSql() {
-        return columnName;
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
+        if (columnName.contains(".")) {
+            String[] parts = columnName.split("\\.");
+            return parts[0] + "." + dialect.quote(parts[1]);
+        }
+        return dialect.quote(columnName);
     }
 
     @Override

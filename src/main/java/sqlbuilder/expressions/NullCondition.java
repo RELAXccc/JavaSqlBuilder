@@ -13,8 +13,8 @@ public class NullCondition implements Condition {
     }
 
     @Override
-    public String toSql() {
-        return column + " IS NULL";
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
+        return dialect.quote(column) + " IS NULL";
     }
 
     @Override

@@ -1,5 +1,6 @@
 package sqlbuilder.expressions;
 
+import sqlbuilder.dialects.SqlDialect;
 import java.util.List;
 
 /**
@@ -9,9 +10,10 @@ public interface Operand {
     /**
      * Converts the operand to its SQL string representation.
      *
+     * @param dialect the SQL dialect to use
      * @return the SQL string
      */
-    String toSql();
+    String toSql(SqlDialect dialect);
 
     /**
      * Adds the parameters associated with this operand to the provided list.

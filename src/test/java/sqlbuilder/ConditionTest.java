@@ -14,18 +14,19 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConditionTest {
+    private final SqlDialect dialect = new H2Dialect();
 
     @Test
     void testCompositeConditionEmpty() {
         CompositeCondition composite = new CompositeCondition("AND", Collections.emptyList());
-        assertEquals("", composite.toSql());
+        assertEquals("", composite.toSql(dialect));
         assertTrue(composite.getParameters().isEmpty());
     }
 
     @Test
     void testInConditionEmptyValuesFails() {
         Condition inCondition = Expression.in("col", Collections.emptyList());
-        assertThrows(ValueCannotBeEmptyException.class, inCondition::toSql);
+        assertThrows(ValueCannotBeEmptyException.class, () -> inCondition.toSql(dialect));
     }
 
     @Test
@@ -41,8 +42,8 @@ class ConditionTest {
         Condition andCond = cond.and().eq("b", 2);
         Condition orCond = cond.or().eq("c", 3);
 
-        assertEquals("a = ? AND b = ?", andCond.toSql());
-        assertEquals("a = ? OR c = ?", orCond.toSql());
+        assertEquals("\"a\" = ? AND \"b\" = ?", andCond.toSql(dialect));
+        assertEquals("\"a\" = ? OR \"c\" = ?", orCond.toSql(dialect));
     }
 
     @Test
@@ -65,7 +66,7 @@ class ConditionTest {
         assertNotNull(chain.notIn("a", 1, 2));
         assertNotNull(chain.notIn("a", List.of(1, 2)));
         
-        SelectBuilder sub = new SelectBuilder(new PostgresDialect()).from("t");
+        SelectBuilder sub = new SelectBuilder(dialect).from("t");
         assertNotNull(chain.in("a", sub));
         assertNotNull(chain.notIn("a", sub));
         assertNotNull(chain.exists(sub));
@@ -74,15 +75,15 @@ class ConditionTest {
 
     @Test
     void testOperands() {
-        assertEquals("col", Expression.column("col").toSql());
-        assertEquals("?", Expression.value(1).toSql());
-        assertEquals("?", Expression.param(1).toSql());
+        assertEquals("\"col\"", Expression.column("col").toSql(dialect));
+        assertEquals("?", Expression.value(1).toSql(dialect));
+        assertEquals("?", Expression.param(1).toSql(dialect));
     }
 
     @Test
     void testInConditionWithValuesList() {
         Condition in = Expression.in("col", List.of(1, 2, 3));
-        assertEquals("col IN (?, ?, ?)", in.toSql());
+        assertEquals("\"col\" IN (?, ?, ?)", in.toSql(dialect));
         assertEquals(List.of(1, 2, 3), in.getParameters());
     }
 }

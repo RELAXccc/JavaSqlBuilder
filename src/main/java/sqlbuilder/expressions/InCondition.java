@@ -34,9 +34,9 @@ public class InCondition implements Condition {
     }
 
     @Override
-    public String toSql() {
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
         StringBuilder sql = new StringBuilder()
-                .append(column)
+                .append(dialect.quote(column))
                 .append(" ")
                 .append(operator)
                 .append(" (");

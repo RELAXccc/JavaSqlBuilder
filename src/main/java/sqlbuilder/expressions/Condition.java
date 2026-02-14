@@ -1,6 +1,6 @@
 package sqlbuilder.expressions;
 
-import sqlbuilder.SelectBuilder;
+import sqlbuilder.dialects.SqlDialect;
 import java.util.List;
 
 /**
@@ -10,9 +10,10 @@ public interface Condition {
     /**
      * Converts the condition to its SQL string representation.
      *
+     * @param dialect the SQL dialect to use
      * @return the SQL string
      */
-    String toSql();
+    String toSql(SqlDialect dialect);
 
     /**
      * Returns the list of parameters associated with this condition.

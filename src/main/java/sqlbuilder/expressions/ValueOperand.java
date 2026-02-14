@@ -13,7 +13,7 @@ public class ValueOperand implements Operand {
     }
 
     @Override
-    public String toSql() {
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
         return "?";
     }
 

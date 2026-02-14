@@ -82,7 +82,7 @@ public class DeleteBuilder extends AbstractBuilder<DeleteBuilder> {
         if (!conditions.isEmpty()) {
             statement.add("WHERE");
             whereCondition = new CompositeCondition("AND", conditions);
-            statement.add(whereCondition.toSql());
+            statement.add(whereCondition.toSql(dialect));
         }
 
         Query query = new Query(statement.toString());

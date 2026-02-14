@@ -9,7 +9,7 @@ public class NotNullCondition extends NullCondition {
     }
 
     @Override
-    public String toSql() {
-        return column + " IS NOT NULL";
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
+        return dialect.quote(column) + " IS NOT NULL";
     }
 }

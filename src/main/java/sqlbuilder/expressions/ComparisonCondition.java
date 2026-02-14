@@ -19,11 +19,11 @@ public class ComparisonCondition implements Condition {
     }
 
     @Override
-    public String toSql() {
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
         return new StringJoiner(" ")
-                .add(column.toSql())
+                .add(column.toSql(dialect))
                 .add(operator)
-                .add(comparisonValue.toSql())
+                .add(comparisonValue.toSql(dialect))
                 .toString();
     }
 

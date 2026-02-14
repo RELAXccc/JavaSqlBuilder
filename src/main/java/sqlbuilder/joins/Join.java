@@ -41,7 +41,7 @@ public abstract class Join {
         if (alias != null && !alias.isBlank()) {
             sql.append(" ").append(alias);
         }
-        sql.append(" ON ").append(condition.toSql());
+        sql.append(" ON ").append(condition.toSql(dialect));
         return sql.toString();
     }
 

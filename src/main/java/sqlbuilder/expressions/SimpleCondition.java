@@ -19,9 +19,9 @@ public class SimpleCondition implements Condition {
     }
 
     @Override
-    public String toSql() {
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
         return new StringJoiner(" ")
-                .add(column)
+                .add(dialect.quote(column))
                 .add(comparisonOperator)
                 .add("?")
                 .toString();

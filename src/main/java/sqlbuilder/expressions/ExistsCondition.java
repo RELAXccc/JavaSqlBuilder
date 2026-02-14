@@ -20,7 +20,7 @@ public class ExistsCondition implements Condition {
     }
 
     @Override
-    public String toSql() {
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
         return operator + " (" + subQuery.build().getStatement() + ")";
     }
 

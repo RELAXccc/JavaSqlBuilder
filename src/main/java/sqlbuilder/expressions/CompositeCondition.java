@@ -21,13 +21,13 @@ public class CompositeCondition implements Condition {
     }
 
     @Override
-    public String toSql() {
+    public String toSql(sqlbuilder.dialects.SqlDialect dialect) {
         if (conditions.isEmpty()) {
             return "";
         }
 
         return conditions.stream()
-                .map(Condition::toSql)
+                .map(c -> c.toSql(dialect))
                 .collect(Collectors.joining(" " + type + " "));
     }
 
