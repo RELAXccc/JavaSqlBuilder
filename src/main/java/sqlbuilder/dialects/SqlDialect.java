@@ -25,7 +25,7 @@ public interface SqlDialect {
 
         @Override
         public String applyPaging(int limit, int offset) {
-            return " LIMIT " + limit + " OFFSET " + offset;
+            return "LIMIT " + limit + " OFFSET " + offset;
         }
     }
 
@@ -65,14 +65,14 @@ public interface SqlDialect {
     public class PostgresDialect implements SqlDialect {
         @Override
         public String applyPaging(int limit, int offset) {
-            return " LIMIT " + limit + " OFFSET " + offset;
+            return "LIMIT " + limit + " OFFSET " + offset;
         }
     }
 
     public class H2Dialect implements SqlDialect {
         @Override
         public String applyPaging(int limit, int offset) {
-            return " LIMIT " + limit + " OFFSET " + offset;
+            return "LIMIT " + limit + " OFFSET " + offset;
         }
     }
 }

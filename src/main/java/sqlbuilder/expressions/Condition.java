@@ -140,7 +140,7 @@ class NotNullCondition extends NullCondition {
 
     @Override
     public String toSql() {
-        return column + "IS NOT NULL";
+        return column + " IS NOT NULL";
     }
 }
 
