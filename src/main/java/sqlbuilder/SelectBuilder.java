@@ -13,7 +13,8 @@ public class SelectBuilder {
 
     private final List<String> columns = new ArrayList<>();
     private final List<String> tables = new ArrayList<>();
-    private final List<String> tablesContext = new ArrayList<>();
+    private final Set<String> tablesContext = new HashSet<>();
+    private final List<String> joins = new ArrayList<>();
     private final List<Condition> conditions = new ArrayList<>();
 
     private int limit = -1;
@@ -71,7 +72,29 @@ public class SelectBuilder {
     }
 
     public SelectBuilder join(String table, Condition joinCondition) {
-        //TODO: implement join
+        tablesContext.add(table);
+        StringJoiner join = new StringJoiner(" ")
+                .add("JOIN");
+        table = this.DIALECT.formatTableIdentifier(table, tablesContext);
+        join.add(table)
+                .add("ON")
+                .add(joinCondition.toSql());
+
+        joins.add(join.toString());
+        return this;
+    }
+
+    public SelectBuilder join(String table, String alias, Condition joinCondition) {
+        tablesContext.add(table);
+        StringJoiner join = new StringJoiner(" ")
+                .add("JOIN");
+        table = this.DIALECT.formatTableIdentifier(table, tablesContext);
+        join.add(table)
+                .add(alias)
+                .add("ON")
+                .add(joinCondition.toSql());
+
+        joins.add(join.toString());
         return this;
     }
 
