@@ -3,7 +3,6 @@ package sqlbuilder;
 import sqlbuilder.dialects.SqlDialect;
 import sqlbuilder.exceptions.ValueCannotBeEmptyException;
 import sqlbuilder.expressions.Condition;
-import sqlbuilder.expressions.Expression;
 
 import java.util.*;
 
@@ -203,6 +202,10 @@ public class SelectBuilder {
             }
 
             statement.add("ORDER BY").add(String.join(", ", orderColumns)).add(orderDirection);
+        }
+
+        if(limit > -1) {
+            statement.add(DIALECT.applyPaging(limit, offset));
         }
 
         return new Query(statement.toString());
