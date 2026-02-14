@@ -20,6 +20,7 @@ public class SelectBuilder {
     private final List<String> groupColumns = new ArrayList<>();
     private final List<String> orderColumns = new ArrayList<>();
     private String orderDirection = null;
+    private boolean distinct = false;
 
     private int limit = -1;
     private int offset = 0;
@@ -41,6 +42,17 @@ public class SelectBuilder {
         Arrays.stream(columns)
                 .map(DIALECT::quote)
                 .forEach(this.columns::add);
+        return this;
+    }
+
+    public SelectBuilder selectDistinct(String... columns) {
+        select(columns);
+        distinct = true;
+        return this;
+    }
+
+    public SelectBuilder distinct() {
+        distinct = true;
         return this;
     }
 
@@ -169,8 +181,11 @@ public class SelectBuilder {
         }
 
         StringJoiner statement = new StringJoiner(" ")
-                .add("SELECT")
-                .add(String.join(", ", columns))
+                .add("SELECT");
+        if(distinct) {
+            statement.add("DISTINCT");
+        }
+        statement.add(String.join(", ", columns))
                 .add("FROM")
                 .add(String.join(", ", tables));
 
