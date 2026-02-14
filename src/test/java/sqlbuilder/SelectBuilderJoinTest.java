@@ -19,10 +19,10 @@ class SelectBuilderJoinTest {
                 .fullJoin("e", Expression.eq("a.id", Expression.column("e.id")));
 
         String expected = "SELECT * FROM a " +
-                "INNER JOIN b ON a.id = b.id " +
-                "LEFT JOIN c ON a.id = c.id " +
-                "RIGHT JOIN d ON a.id = d.id " +
-                "FULL OUTER JOIN e ON a.id = e.id";
+                "INNER JOIN b ON \"a\".\"id\" = \"b\".\"id\" " +
+                "LEFT JOIN c ON \"a\".\"id\" = \"c\".\"id\" " +
+                "RIGHT JOIN d ON \"a\".\"id\" = \"d\".\"id\" " +
+                "FULL OUTER JOIN e ON \"a\".\"id\" = \"e\".\"id\"";
         assertEquals(expected, builder.build().getStatement());
     }
 
@@ -31,6 +31,6 @@ class SelectBuilderJoinTest {
         SelectBuilder builder = new SelectBuilder(new PostgresDialect())
                 .from("users", "u")
                 .join("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")));
-        assertEquals("SELECT * FROM users u INNER JOIN orders o ON u.id = o.user_id", builder.build().getStatement());
+        assertEquals("SELECT * FROM users u INNER JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\"", builder.build().getStatement());
     }
 }

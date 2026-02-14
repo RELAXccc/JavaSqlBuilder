@@ -16,19 +16,19 @@ class JoinTest {
     @Test
     void testInnerJoinToSql() {
         Join join = new InnerJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")));
-        assertEquals("INNER JOIN orders o ON u.id = o.user_id", join.toSql(new PostgresDialect(), null));
+        assertEquals("INNER JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\"", join.toSql(new PostgresDialect(), null));
     }
 
     @Test
     void testJoinWithSchema() {
         Join join = new LeftJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")));
-        assertEquals("LEFT JOIN myschema.orders o ON u.id = o.user_id", join.toSql(new PostgresDialect(), "myschema"));
+        assertEquals("LEFT JOIN myschema.orders o ON \"u\".\"id\" = \"o\".\"user_id\"", join.toSql(new PostgresDialect(), "myschema"));
     }
 
     @Test
     void testJoinNoAlias() {
         Join join = new RightJoin("orders", null, Expression.eq("u.id", Expression.column("orders.user_id")));
-        assertEquals("RIGHT JOIN orders ON u.id = orders.user_id", join.toSql(new PostgresDialect(), ""));
+        assertEquals("RIGHT JOIN orders ON \"u\".\"id\" = \"orders\".\"user_id\"", join.toSql(new PostgresDialect(), ""));
     }
 
     @Test

@@ -55,7 +55,7 @@ class ExpressionTest {
                 .and().exists(sub)
                 .and().notExists(sub);
         
-        String expected = "\"a\" IN (?, ?) AND \"b\" NOT IN (?, ?) AND EXISTS (SELECT * FROM \"sub\") AND NOT EXISTS (SELECT * FROM \"sub\")";
+        String expected = "\"a\" IN (?, ?) AND \"b\" NOT IN (?, ?) AND EXISTS (SELECT * FROM sub) AND NOT EXISTS (SELECT * FROM sub)";
         assertEquals(expected, chain.toSql(dialect));
     }
 
@@ -67,8 +67,8 @@ class ExpressionTest {
 
     @Test
     void testColumnWithAlias() {
-        assertEquals("u.\"name\"", Expression.column("u", "name").toSql(dialect));
-        assertEquals("u.\"name\"", Expression.column("u", "u.name").toSql(dialect));
+        assertEquals("\"u\".\"name\"", Expression.column("u", "name").toSql(dialect));
+        assertEquals("\"u\".\"name\"", Expression.column("u", "u.name").toSql(dialect));
         assertEquals("\"name\"", Expression.column(null, "name").toSql(dialect));
     }
 }

@@ -34,7 +34,7 @@ class CrudBuilderTest {
                 .where(Expression.eq("ID", 1))
                 .build();
 
-        assertEquals("UPDATE USERS SET \"NAME\" = ?, \"AGE\" = ? WHERE ID = ?", query.getStatement());
+        assertEquals("UPDATE USERS SET \"NAME\" = ?, \"AGE\" = ? WHERE \"ID\" = ?", query.getStatement());
         assertEquals(3, query.getParameters().size());
         assertEquals("Jane Doe", query.getParameters().get(0));
         assertEquals(25, query.getParameters().get(1));
@@ -49,7 +49,7 @@ class CrudBuilderTest {
                 .where(Expression.eq("ID", 1))
                 .build();
 
-        assertEquals("DELETE FROM USERS WHERE ID = ?", query.getStatement());
+        assertEquals("DELETE FROM USERS WHERE \"ID\" = ?", query.getStatement());
         assertEquals(1, query.getParameters().size());
         assertEquals(1, query.getParameters().get(0));
     }
@@ -98,7 +98,7 @@ class CrudBuilderTest {
 
         UpdateBuilder updateBuilder = new UpdateBuilder(new OracleDialect());
         Query updateQuery = updateBuilder.table("USERS").set(values).where(Expression.eq("ID", 1)).build();
-        assertEquals("UPDATE USERS SET \"NAME\" = ?, \"AGE\" = ? WHERE ID = ?", updateQuery.getStatement());
+        assertEquals("UPDATE USERS SET \"NAME\" = ?, \"AGE\" = ? WHERE \"ID\" = ?", updateQuery.getStatement());
     }
 
     @Test

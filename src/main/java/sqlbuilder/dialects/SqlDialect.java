@@ -13,6 +13,18 @@ public interface SqlDialect {
      * @return the quoted identifier
      */
     default String quote(String identifier) {
+        if (identifier == null || identifier.isBlank() || identifier.equals("*") || identifier.contains("(")) {
+            return identifier;
+        }
+        if (identifier.contains(".")) {
+            String[] parts = identifier.split("\\.");
+            StringBuilder quoted = new StringBuilder();
+            for (int i = 0; i < parts.length; i++) {
+                if (i > 0) quoted.append(".");
+                quoted.append(quote(parts[i]));
+            }
+            return quoted.toString();
+        }
         return "\"" + identifier + "\"";
     }
 

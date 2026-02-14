@@ -22,7 +22,7 @@ class SelectBuilderAggregateTest {
                 .orderBy("dept").asc();
         
         Query query = builder.build();
-        assertEquals("SELECT \"dept\", \"AVG(salary)\" FROM employees WHERE age > ? GROUP BY dept HAVING AVG(salary) > ? ORDER BY dept ASC", query.getStatement());
+        assertEquals("SELECT \"dept\", AVG(salary) FROM employees WHERE \"age\" > ? GROUP BY \"dept\" HAVING AVG(salary) > ? ORDER BY \"dept\" ASC", query.getStatement());
         assertEquals(List.of(25, 50000), query.getParameters());
     }
 }

@@ -39,7 +39,7 @@ class SelectBuilderTest {
         Query query = builder.from("users")
                 .where(Expression.eq("id", 1))
                 .build();
-        assertEquals("SELECT * FROM users WHERE id = ?", query.getStatement());
+        assertEquals("SELECT * FROM users WHERE \"id\" = ?", query.getStatement());
         assertEquals(List.of(1), query.getParameters());
     }
 
@@ -49,7 +49,7 @@ class SelectBuilderTest {
         Query query = builder.from("users")
                 .where(Expression.eq("status", "active").and().gt("age", 18))
                 .build();
-        assertEquals("SELECT * FROM users WHERE status = ? AND age > ?", query.getStatement());
+        assertEquals("SELECT * FROM users WHERE \"status\" = ? AND \"age\" > ?", query.getStatement());
         assertEquals(List.of("active", 18), query.getParameters());
     }
 
@@ -59,7 +59,7 @@ class SelectBuilderTest {
         Query query = builder.from("users")
                 .where(Expression.in("status", "active", "pending", "archived"))
                 .build();
-        assertEquals("SELECT * FROM users WHERE status IN (?, ?, ?)", query.getStatement());
+        assertEquals("SELECT * FROM users WHERE \"status\" IN (?, ?, ?)", query.getStatement());
         assertEquals(List.of("active", "pending", "archived"), query.getParameters());
     }
 
@@ -70,7 +70,7 @@ class SelectBuilderTest {
         SelectBuilder builder = new SelectBuilder(dialect).from("orders")
                 .where(Expression.in("user_id", subQuery));
         Query query = builder.build();
-        assertEquals("SELECT * FROM orders WHERE user_id IN (SELECT \"id\" FROM active_users)", query.getStatement());
+        assertEquals("SELECT * FROM orders WHERE \"user_id\" IN (SELECT \"id\" FROM active_users)", query.getStatement());
     }
 
     @Test
@@ -80,7 +80,7 @@ class SelectBuilderTest {
         SelectBuilder builder = new SelectBuilder(dialect).from("users")
                 .where(Expression.exists(subQuery));
         Query query = builder.build();
-        assertEquals("SELECT * FROM users WHERE EXISTS (SELECT * FROM orders WHERE user_id = users.id)", query.getStatement());
+        assertEquals("SELECT * FROM users WHERE EXISTS (SELECT * FROM orders WHERE \"user_id\" = \"users\".\"id\")", query.getStatement());
     }
 
     @Test
@@ -89,7 +89,7 @@ class SelectBuilderTest {
         Query query = builder.from("users")
                 .where(Expression.not(Expression.eq("status", "deleted")))
                 .build();
-        assertEquals("SELECT * FROM users WHERE NOT status = ?", query.getStatement());
+        assertEquals("SELECT * FROM users WHERE NOT \"status\" = ?", query.getStatement());
         assertEquals(List.of("deleted"), query.getParameters());
     }
 
@@ -99,7 +99,7 @@ class SelectBuilderTest {
         Query query = builder.from("users")
                 .where(Expression.eq("status", "active").and().in("role", "admin", "editor"))
                 .build();
-        assertEquals("SELECT * FROM users WHERE status = ? AND role IN (?, ?)", query.getStatement());
+        assertEquals("SELECT * FROM users WHERE \"status\" = ? AND \"role\" IN (?, ?)", query.getStatement());
         assertEquals(List.of("active", "admin", "editor"), query.getParameters());
     }
 
@@ -110,7 +110,7 @@ class SelectBuilderTest {
                 .from("users", "u")
                 .join("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
                 .build();
-        assertEquals("SELECT \"u.name\", \"o.order_date\" FROM users u INNER JOIN orders o ON u.id = o.user_id", query.getStatement());
+        assertEquals("SELECT \"u\".\"name\", \"o\".\"order_date\" FROM users u INNER JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\"", query.getStatement());
     }
 
     @Test
@@ -120,7 +120,7 @@ class SelectBuilderTest {
                 .from("users", "u")
                 .leftJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
                 .build();
-        assertEquals("SELECT \"u.name\", \"o.id\" FROM users u LEFT JOIN orders o ON u.id = o.user_id", query.getStatement());
+        assertEquals("SELECT \"u\".\"name\", \"o\".\"id\" FROM users u LEFT JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\"", query.getStatement());
     }
 
     @Test
@@ -130,7 +130,7 @@ class SelectBuilderTest {
                 .from("users", "u")
                 .rightJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
                 .build();
-        assertEquals("SELECT \"u.name\", \"o.id\" FROM users u RIGHT JOIN orders o ON u.id = o.user_id", query.getStatement());
+        assertEquals("SELECT \"u\".\"name\", \"o\".\"id\" FROM users u RIGHT JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\"", query.getStatement());
     }
 
     @Test
@@ -140,7 +140,7 @@ class SelectBuilderTest {
                 .from("users", "u")
                 .fullJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
                 .build();
-        assertEquals("SELECT \"u.name\", \"o.id\" FROM users u FULL OUTER JOIN orders o ON u.id = o.user_id", query.getStatement());
+        assertEquals("SELECT \"u\".\"name\", \"o\".\"id\" FROM users u FULL OUTER JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\"", query.getStatement());
     }
 
     @Test
@@ -151,7 +151,7 @@ class SelectBuilderTest {
                 .limit(10)
                 .offset(5)
                 .build();
-        assertEquals("SELECT * FROM products ORDER BY price DESC LIMIT 10 OFFSET 5", query.getStatement());
+        assertEquals("SELECT * FROM products ORDER BY \"price\" DESC LIMIT 10 OFFSET 5", query.getStatement());
     }
 
     @Test
@@ -171,7 +171,7 @@ class SelectBuilderTest {
                 .where(Expression.isNull("deleted_at"))
                 .where(Expression.isNotNull("email"))
                 .build();
-        assertEquals("SELECT * FROM users WHERE deleted_at IS NULL AND email IS NOT NULL", query.getStatement());
+        assertEquals("SELECT * FROM users WHERE \"deleted_at\" IS NULL AND \"email\" IS NOT NULL", query.getStatement());
     }
 
     @Test
@@ -183,7 +183,7 @@ class SelectBuilderTest {
                 .join("order_items", "oi", Expression.eq("o.id", Expression.column("oi.order_id")))
                 .join("products", "p", Expression.eq("oi.product_id", Expression.column("p.id")))
                 .build();
-        assertEquals("SELECT \"u.name\", \"o.id\", \"p.name\" FROM users u INNER JOIN orders o ON u.id = o.user_id INNER JOIN order_items oi ON o.id = oi.order_id INNER JOIN products p ON oi.product_id = p.id", query.getStatement());
+        assertEquals("SELECT \"u\".\"name\", \"o\".\"id\", \"p\".\"name\" FROM users u INNER JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\" INNER JOIN order_items oi ON \"o\".\"id\" = \"oi\".\"order_id\" INNER JOIN products p ON \"oi\".\"product_id\" = \"p\".\"id\"", query.getStatement());
     }
 
     @Test
@@ -199,7 +199,7 @@ class SelectBuilderTest {
         Query query = builder.from("users", "u")
                 .join("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
                 .build();
-        assertEquals("SELECT * FROM myschema.users u INNER JOIN myschema.orders o ON u.id = o.user_id", query.getStatement());
+        assertEquals("SELECT * FROM myschema.users u INNER JOIN myschema.orders o ON \"u\".\"id\" = \"o\".\"user_id\"", query.getStatement());
     }
 
     @Test
@@ -209,7 +209,7 @@ class SelectBuilderTest {
                 .from("employees")
                 .groupBy("department")
                 .build();
-        assertEquals("SELECT \"department\", \"COUNT(*)\" FROM employees GROUP BY department", query.getStatement());
+        assertEquals("SELECT \"department\", COUNT(*) FROM employees GROUP BY \"department\"", query.getStatement());
     }
 
     @Test
@@ -220,7 +220,7 @@ class SelectBuilderTest {
                 .groupBy("department")
                 .having(Expression.gt("COUNT(*)", 5))
                 .build();
-        assertEquals("SELECT \"department\", \"COUNT(*)\" FROM employees GROUP BY department HAVING COUNT(*) > ?", query.getStatement());
+        assertEquals("SELECT \"department\", COUNT(*) FROM employees GROUP BY \"department\" HAVING COUNT(*) > ?", query.getStatement());
         assertEquals(List.of(5), query.getParameters());
     }
 
@@ -228,7 +228,7 @@ class SelectBuilderTest {
     void testOrderByAsc() {
         SelectBuilder builder = new SelectBuilder(new PostgresDialect());
         Query query = builder.from("users").orderBy("name").asc().build();
-        assertEquals("SELECT * FROM users ORDER BY name ASC", query.getStatement());
+        assertEquals("SELECT * FROM users ORDER BY \"name\" ASC", query.getStatement());
     }
 
     @Test
@@ -263,7 +263,7 @@ class SelectBuilderTest {
                 .limit(10)
                 .build();
         
-        String expected = "SELECT \"u.name\", \"SUM(o.amount)\" FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE u.status = ? GROUP BY u.name HAVING SUM(o.amount) > ? ORDER BY u.name ASC LIMIT 10 OFFSET 0";
+        String expected = "SELECT \"u\".\"name\", SUM(o.amount) FROM users u LEFT JOIN orders o ON \"u\".\"id\" = \"o\".\"user_id\" WHERE \"u\".\"status\" = ? GROUP BY \"u\".\"name\" HAVING SUM(o.amount) > ? ORDER BY \"u\".\"name\" ASC LIMIT 10 OFFSET 0";
         assertEquals(expected, query.getStatement());
         assertEquals(List.of("active", 1000), query.getParameters());
     }
@@ -293,7 +293,7 @@ class SelectBuilderTest {
     void testMultipleOrderBy() {
         SelectBuilder builder = new SelectBuilder(new PostgresDialect());
         Query query = builder.from("users").orderBy("name", "age").desc().build();
-        assertEquals("SELECT * FROM users ORDER BY name, age DESC", query.getStatement());
+        assertEquals("SELECT * FROM users ORDER BY \"name\", \"age\" DESC", query.getStatement());
     }
 
     @Test

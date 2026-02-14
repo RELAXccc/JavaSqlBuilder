@@ -397,7 +397,10 @@ public class SelectBuilder extends AbstractBuilder<SelectBuilder> {
         }
 
         if (!groupColumns.isEmpty()) {
-            statement.add("GROUP BY").add(String.join(", ", groupColumns));
+            String quotedGroups = groupColumns.stream()
+                    .map(dialect::quote)
+                    .collect(java.util.stream.Collectors.joining(", "));
+            statement.add("GROUP BY").add(quotedGroups);
         }
 
         if (havingCondition != null) {
@@ -409,7 +412,10 @@ public class SelectBuilder extends AbstractBuilder<SelectBuilder> {
                 orderDirection = "DESC";
             }
 
-            statement.add("ORDER BY").add(String.join(", ", orderColumns)).add(orderDirection);
+            String quotedOrders = orderColumns.stream()
+                    .map(dialect::quote)
+                    .collect(java.util.stream.Collectors.joining(", "));
+            statement.add("ORDER BY").add(quotedOrders).add(orderDirection);
         }
 
         if (limit > -1) {
