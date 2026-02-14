@@ -2,139 +2,64 @@
 
 [![Build Status](https://github.com/RELAXccc/JavaSqlBuilder/actions/workflows/maven.yml/badge.svg)](https://github.com/RELAXccc/JavaSqlBuilder/actions)
 ![Coverage](.github/badges/jacoco.svg)
-![Branches](.github/badges/branches.svg)
-[Deutsch](README_DE.md)
 
-> 🚧 **Work In Progress**: This project is still under active development and not yet stable.
-
-JavaSqlBuilder is a lightweight, fluent API library for Java 21 designed to construct SQL queries programmatically. It provides a type-safe and readable way to build complex SELECT statements, handling various SQL dialects and preventing common syntax errors.
+Lightweight, fluent SQL builder for Java 21. Build complex queries programmatically with type-safety and multi-dialect support.
 
 ## Features
+- **Fluent CRUD**: Programmatic `SELECT`, `INSERT`, `UPDATE`, and `DELETE`.
+- **Multi-Dialect**: Native support for Oracle, Postgres, H2, DB2, and MSSQL.
+- **Modular Expressions**: Deeply nested `WHERE`/`HAVING` clauses with `AND`/`OR` chaining.
+- **Type-Safe Joins**: Dedicated join implementations for `INNER`, `LEFT`, `RIGHT`, and `FULL`.
+- **Zero-Dependency**: Keeps your project footprint small.
 
-- **Fluent Interface:** Build queries using a natural, readable method chaining approach.
-- **Multi-Dialect Support:** Out-of-the-box support for Oracle, PostgreSQL, H2, DB2, and MSSQL.
-- **Dynamic Conditions:** Complex `WHERE` clause construction with `AND`/`OR` chaining.
-- **Joins & Aliases:** Support for table joins and column/table aliasing.
-- **Paging:** Simplified `LIMIT` and `OFFSET` handling tailored to specific database dialects.
-- **Schema Support:** Easily prefix tables with database schemas.
+## Usage
 
-## Requirements
-
-- **Java:** 21 or higher
-- **Build Tool:** Maven (or any tool compatible with Maven dependencies)
-
-## Installation
-
-Add the following to your `pom.xml`:
-
-```xml
-<dependency>
-    <groupId>org.example</groupId>
-    <artifactId>JavaSqlBuilder2</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
+### Initialization
+```java
+// Choose your dialect
+SqlDialect dialect = new PostgresDialect();
+SelectBuilder select = new SelectBuilder(dialect);
 ```
 
-## Technical Usage
-
-### 1. Initializing the Builder
-Every query starts with a `SelectBuilder`, which requires a `SqlDialect`.
-
+### Complex Queries
 ```java
-import sqlbuilder.SelectBuilder;
-import sqlbuilder.dialects.SqlDialect;
-
-SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
-```
-
-### 2. Basic Select Query
-Define columns and the source table. If no columns are specified, `*` is used by default. Use `selectDistinct` for unique results.
-
-```java
-Query query = builder
-    .select("id", "username", "email")
-    .from("users")
+Query query = select
+    .select("u.name", "COUNT(o.id)")
+    .from("users", "u")
+    .leftJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
+    .where(Expression.eq("u.status", "active"))
+    .groupBy("u.name")
+    .having(Expression.gt("COUNT(o.id)", 5))
+    .orderBy("u.name").asc()
+    .limit(10)
     .build();
 
-// For distinct results:
-builder.selectDistinct("role").from("users");
+System.out.println(query.getStatement()); // SQL string
+System.out.println(query.getParameters()); // List of objects
 ```
 
-### 3. Complex Where Clauses
-Use the `Expression` utility to create conditions. Conditions can be chained using `.and()` or `.or()`.
-
+### CRUD Operations
 ```java
-import sqlbuilder.expressions.Expression;
+// INSERT
+new InsertBuilder(dialect).into("users").value("name", "John").build();
 
-builder.select("name")
-       .from("employees")
-       .where(Expression.eq("department", "IT")
-           .and().gt("salary", 50000)
-           .or().eq("role", "Admin"));
+// UPDATE
+new UpdateBuilder(dialect).table("users").set("status", "active").where(Expression.eq("id", 1)).build();
 
-// Null checks:
-builder.where(Expression.isNull("deleted_at"))
-       .where(Expression.isNotNull("email"));
-
-// IN conditions:
-builder.where(Expression.in("status", "active", "pending"));
-
-// Subqueries with IN and EXISTS:
-SelectBuilder subQuery = new SelectBuilder(dialect).select("id").from("active_users");
-builder.where(Expression.in("user_id", subQuery));
-builder.where(Expression.exists(subQuery));
-
-// Negation:
-builder.where(Expression.not(Expression.eq("deleted", true)));
+// DELETE
+new DeleteBuilder(dialect).from("users").where(Expression.eq("id", 1)).build();
 ```
 
-### 4. Joins
-Perform joins by specifying the target table and the join condition.
-
-```java
-builder.select("u.name", "o.order_date")
-       .from("users", "u")
-       .join("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")));
-```
-
-### 5. Ordering and Paging
-Easily add sorting and pagination to your results.
-
-```java
-builder.from("products")
-       .orderBy("price").desc()
-       .limit(10)
-       .offset(20);
-```
+## Architecture
+- **Builders**: Orchestrate query assembly, extending `AbstractBuilder`.
+- **Dialects**: Isolate DB-specific syntax (e.g., paging).
+- **Expressions**: Modular system of `Condition` and `Operand` objects.
+- **Joins**: Independent classes for SQL join logic.
 
 ## Development
-
-### Running Tests & Coverage
-This project uses JaCoCo for test coverage reporting. To run tests and generate a report:
-
 ```bash
-mvn clean test
+mvn clean test # Run tests and JaCoCo coverage
 ```
 
-The coverage report can then be found at: `target/site/jacoco/index.html`.
-
-### Project Context
-For AI-assisted development, a `GEMINI.md` file is used to provide project-specific context. This file is ignored by git to allow for local customization.
-
-## Architecture Overview
-
-- **`SelectBuilder`**: The core engine that orchestrates the query construction.
-- **`SqlDialect`**: An interface allowing the builder to adapt to different SQL syntaxes (e.g., paging logic).
-- **`Condition` & `Expression`**: A robust system for building logical SQL expressions. `Expression` acts as a factory for creating various comparison conditions.
-- **`Operand`**: Represents the building blocks of conditions (Columns, Values, or Parameters).
-- **`Query`**: The final product containing the generated SQL string and prepared statement parameters.
-
-## Contributing
-
-1. Implement the `SqlDialect` interface for new database engines.
-2. Extend `Expression` for more complex SQL functions (e.g., `IN`, `BETWEEN`).
-3. Enhance the `Query.execute()` method to integrate with JDBC.
-
 ## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT

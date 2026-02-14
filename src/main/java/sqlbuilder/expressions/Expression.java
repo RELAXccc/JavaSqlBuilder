@@ -32,43 +32,43 @@ public class Expression {
     public static Condition eq(String column, Object comparisonValue) {
         Operand left = new ColumnOperand(column);
         Operand right = getCorrectOperand(comparisonValue);
-        return new ComparisionCondition(left, "=", right);
+        return new ComparisonCondition(left, "=", right);
     }
 
     public static Condition neq(String column, Object comparisonValue) {
         Operand left = new ColumnOperand(column);
         Operand right = getCorrectOperand(comparisonValue);
-        return new ComparisionCondition(left, "<>", right);
+        return new ComparisonCondition(left, "<>", right);
     }
 
     public static Condition lt(String column, Object comparisonValue) {
         Operand left = new ColumnOperand(column);
         Operand right = getCorrectOperand(comparisonValue);
-        return new ComparisionCondition(left, "<", right);
+        return new ComparisonCondition(left, "<", right);
     }
 
     public static Condition leq(String column, Object comparisonValue) {
         Operand left = new ColumnOperand(column);
         Operand right = getCorrectOperand(comparisonValue);
-        return new ComparisionCondition(left, "<=", right);
+        return new ComparisonCondition(left, "<=", right);
     }
 
     public static Condition gt(String column, Object comparisonValue) {
         Operand left = new ColumnOperand(column);
         Operand right = getCorrectOperand(comparisonValue);
-        return new ComparisionCondition(left, ">", right);
+        return new ComparisonCondition(left, ">", right);
     }
 
     public static Condition geq(String column, Object comparisonValue) {
         Operand left = new ColumnOperand(column);
         Operand right = getCorrectOperand(comparisonValue);
-        return new ComparisionCondition(left, ">=", right);
+        return new ComparisonCondition(left, ">=", right);
     }
 
     public static Condition like(String column, Object comparisonValue) {
         Operand left = new ColumnOperand(column);
         Operand right = getCorrectOperand(comparisonValue);
-        return new ComparisionCondition(left, "LIKE", right);
+        return new ComparisonCondition(left, "LIKE", right);
     }
 
     public static Condition isNull(String column) {

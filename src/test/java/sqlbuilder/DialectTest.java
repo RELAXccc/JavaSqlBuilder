@@ -2,6 +2,7 @@ package sqlbuilder;
 
 import org.junit.jupiter.api.Test;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.dialects.*;
 import sqlbuilder.exceptions.ValueCannotBeEmptyException;
 
 import java.util.Collections;
@@ -14,32 +15,32 @@ class DialectTest {
 
     @Test
     void testPostgresDialect() {
-        SqlDialect dialect = new SqlDialect.PostgresDialect();
+        SqlDialect dialect = new PostgresDialect();
         assertEquals("LIMIT 10 OFFSET 5", dialect.applyPaging(10, 5));
         assertEquals("\"user\"", dialect.quote("user"));
     }
 
     @Test
     void testOracleDialect() {
-        SqlDialect dialect = new SqlDialect.OracleDialect();
+        SqlDialect dialect = new OracleDialect();
         assertEquals("LIMIT 10 OFFSET 5", dialect.applyPaging(10, 5));
     }
 
     @Test
     void testH2Dialect() {
-        SqlDialect dialect = new SqlDialect.H2Dialect();
+        SqlDialect dialect = new H2Dialect();
         assertEquals("LIMIT 10 OFFSET 5", dialect.applyPaging(10, 5));
     }
 
     @Test
     void testMsSQLDialect() {
-        SqlDialect dialect = new SqlDialect.MsSQLDialect();
+        SqlDialect dialect = new MsSQLDialect();
         assertEquals("", dialect.applyPaging(10, 5)); // Current placeholder behavior
     }
 
     @Test
     void testDB2Dialect() {
-        SqlDialect dialect = new SqlDialect.DB2Dialect();
+        SqlDialect dialect = new DB2Dialect();
         assertEquals("", dialect.applyPaging(10, 5));
         
         Set<String> context = Set.of("users");
@@ -49,7 +50,7 @@ class DialectTest {
 
     @Test
     void testDB2DialectExceptions() {
-        SqlDialect.DB2Dialect dialect = new SqlDialect.DB2Dialect();
+         DB2Dialect dialect = new DB2Dialect();
         assertThrows(ValueCannotBeEmptyException.class, () -> dialect.formatTableIdentifier("", Collections.emptySet()));
     }
 }

@@ -2,7 +2,9 @@ package sqlbuilder;
 
 import org.junit.jupiter.api.Test;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.dialects.*;
 import sqlbuilder.expressions.Condition;
+import sqlbuilder.expressions.*;
 import sqlbuilder.expressions.Expression;
 
 import java.util.List;
@@ -45,7 +47,7 @@ class ExpressionTest {
 
     @Test
     void testInAndExistsChain() {
-        SqlDialect dialect = new SqlDialect.PostgresDialect();
+        SqlDialect dialect = new PostgresDialect();
         SelectBuilder sub = new SelectBuilder(dialect).from("sub");
         
         Condition chain = Expression.in("a", 1, 2)

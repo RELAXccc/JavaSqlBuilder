@@ -2,65 +2,21 @@ package sqlbuilder.expressions;
 
 import java.util.List;
 
+/**
+ * Interface representing a SQL operand (column, value, parameter).
+ */
 public interface Operand {
-    public String toSql();
-    public void addParameters(List<Object> parameters);
-}
+    /**
+     * Converts the operand to its SQL string representation.
+     *
+     * @return the SQL string
+     */
+    String toSql();
 
-class ValueOperand implements Operand {
-    private final Object value;
-
-    public ValueOperand(Object value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toSql() {
-        return "?";
-    }
-
-    @Override
-    public void addParameters(List<Object> parameters) {
-        parameters.add(value);
-    }
-}
-
-class ColumnOperand implements Operand {
-    private final String columnName;
-
-    public ColumnOperand(String columnName) {
-        this.columnName = columnName;
-    }
-
-    @Override
-    public String toSql() {
-        return columnName;
-    }
-
-    @Override
-    public void addParameters(List<Object> parameters) {
-        // do nothing
-    }
-}
-
-class Parameter implements Operand {
-    private final int index;
-
-    public Parameter(int index) {
-        this.index = index;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    @Override
-    public String toSql() {
-        return "?";
-    }
-
-    @Override
-    public void addParameters(List<Object> parameters) {
-        // do nothing
-    }
+    /**
+     * Adds the parameters associated with this operand to the provided list.
+     *
+     * @param parameters the list of parameters to add to
+     */
+    void addParameters(List<Object> parameters);
 }

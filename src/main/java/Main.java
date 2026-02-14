@@ -1,11 +1,13 @@
 import sqlbuilder.Query;
 import sqlbuilder.SelectBuilder;
+import sqlbuilder.dialects.OracleDialect;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.dialects.*;
 import sqlbuilder.expressions.Expression;
 
 public class Main {
     public static void main(String[] args) {
-        SelectBuilder builder = new SelectBuilder(new SqlDialect.OracleDialect());
+        SelectBuilder builder = new SelectBuilder(new OracleDialect());
 
         Query query = builder
                 .select("A")

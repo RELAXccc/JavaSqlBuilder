@@ -2,6 +2,7 @@ package sqlbuilder;
 
 import org.junit.jupiter.api.Test;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.dialects.*;
 import sqlbuilder.expressions.Expression;
 
 import java.util.List;
@@ -12,7 +13,7 @@ class SelectBuilderAggregateTest {
 
     @Test
     void testComplexAggregateQuery() {
-        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect())
+        SelectBuilder builder = new SelectBuilder(new PostgresDialect())
                 .select("dept", "AVG(salary)")
                 .from("employees")
                 .where(Expression.gt("age", 25))

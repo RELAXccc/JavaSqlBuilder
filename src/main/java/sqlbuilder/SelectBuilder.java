@@ -3,6 +3,7 @@ package sqlbuilder;
 import sqlbuilder.dialects.SqlDialect;
 import sqlbuilder.exceptions.ValueCannotBeEmptyException;
 import sqlbuilder.expressions.Condition;
+import sqlbuilder.expressions.*;
 import sqlbuilder.joins.*;
 
 import java.util.*;
@@ -10,10 +11,8 @@ import java.util.*;
 /**
  * A builder for creating SQL SELECT queries in a fluent manner.
  */
-public class SelectBuilder {
+public class SelectBuilder extends AbstractBuilder<SelectBuilder> {
     private static final String ERROR_MESSAGE_MULTIPLE_ORDER_DIRECTION_CALLS = "order direction can only be set once. Multiple calls of desc() or asc() are not allowed!";
-    private final SqlDialect dialect;
-    private final String schema;
 
     private final List<String> columns = new ArrayList<>();
     private final List<String> tables = new ArrayList<>();
@@ -36,7 +35,7 @@ public class SelectBuilder {
      * @param dialect the SQL dialect to use
      */
     public SelectBuilder(SqlDialect dialect) {
-        this(dialect, null);
+        super(dialect);
     }
 
     /**
@@ -46,8 +45,7 @@ public class SelectBuilder {
      * @param schema  the database schema name
      */
     public SelectBuilder(SqlDialect dialect, String schema) {
-        this.dialect = dialect;
-        this.schema = schema;
+        super(dialect, schema);
     }
 
     /**
@@ -58,14 +56,14 @@ public class SelectBuilder {
      * @throws ValueCannotBeEmptyException if columns are empty
      */
     public SelectBuilder select(String... columns) {
-        if(columns.length == 0) {
+        if (columns.length == 0) {
             throw new ValueCannotBeEmptyException("columns");
         }
 
         Arrays.stream(columns)
                 .map(dialect::quote)
                 .forEach(this.columns::add);
-        return this;
+        return self();
     }
 
     /**
@@ -77,7 +75,7 @@ public class SelectBuilder {
     public SelectBuilder selectDistinct(String... columns) {
         select(columns);
         distinct = true;
-        return this;
+        return self();
     }
 
     /**
@@ -87,7 +85,7 @@ public class SelectBuilder {
      */
     public SelectBuilder distinct() {
         distinct = true;
-        return this;
+        return self();
     }
 
     /**
@@ -98,14 +96,14 @@ public class SelectBuilder {
      * @throws ValueCannotBeEmptyException if tables are empty
      */
     public SelectBuilder from(String... tables) {
-        if(tables.length == 0) {
+        if (tables.length == 0) {
             throw new ValueCannotBeEmptyException("tables");
         }
 
         List<String> tableList = Arrays.asList(tables);
         this.tables.addAll(tableList.stream().map(this::addSchemaToTable).toList());
         this.tablesContext.addAll(tableList);
-        return this;
+        return self();
     }
 
     /**
@@ -116,13 +114,11 @@ public class SelectBuilder {
      * @throws ValueCannotBeEmptyException if table is null or blank
      */
     public SelectBuilder from(String table) {
-        if(table == null || table.isBlank()) {
-            throw new ValueCannotBeEmptyException("table");
-        }
+        validateNotEmpty(table, "table");
 
         this.tables.add(addSchemaToTable(table));
         this.tablesContext.add(table);
-        return this;
+        return self();
     }
 
     /**
@@ -133,13 +129,13 @@ public class SelectBuilder {
      * @return this builder instance
      */
     public SelectBuilder from(String table, String alias) {
-        if(alias == null || alias.isBlank()) {
+        if (alias == null || alias.isBlank()) {
             return from(table);
         }
 
         this.tables.add(addSchemaToTable(table) + " " + alias);
         this.tablesContext.add(table);
-        return this;
+        return self();
     }
 
     /**
@@ -186,8 +182,8 @@ public class SelectBuilder {
      */
     public SelectBuilder innerJoin(String table, String alias, Condition joinCondition) {
         tablesContext.add(table);
-        joins.add(new Join.InnerJoin(table, alias, joinCondition));
-        return this;
+        joins.add(new InnerJoin(table, alias, joinCondition));
+        return self();
     }
 
     /**
@@ -211,8 +207,8 @@ public class SelectBuilder {
      */
     public SelectBuilder leftJoin(String table, String alias, Condition joinCondition) {
         tablesContext.add(table);
-        joins.add(new Join.LeftJoin(table, alias, joinCondition));
-        return this;
+        joins.add(new LeftJoin(table, alias, joinCondition));
+        return self();
     }
 
     /**
@@ -236,8 +232,8 @@ public class SelectBuilder {
      */
     public SelectBuilder rightJoin(String table, String alias, Condition joinCondition) {
         tablesContext.add(table);
-        joins.add(new Join.RightJoin(table, alias, joinCondition));
-        return this;
+        joins.add(new RightJoin(table, alias, joinCondition));
+        return self();
     }
 
     /**
@@ -261,8 +257,8 @@ public class SelectBuilder {
      */
     public SelectBuilder fullJoin(String table, String alias, Condition joinCondition) {
         tablesContext.add(table);
-        joins.add(new Join.FullJoin(table, alias, joinCondition));
-        return this;
+        joins.add(new FullJoin(table, alias, joinCondition));
+        return self();
     }
 
     /**
@@ -273,12 +269,12 @@ public class SelectBuilder {
      * @return this builder instance
      */
     public SelectBuilder where(Condition condition) {
-        if(condition == null) {
-            return this;
+        if (condition == null) {
+            return self();
         }
 
         conditions.add(condition);
-        return this;
+        return self();
     }
 
     /**
@@ -289,7 +285,7 @@ public class SelectBuilder {
      */
     public SelectBuilder groupBy(String... columns) {
         groupColumns.addAll(List.of(columns));
-        return this;
+        return self();
     }
 
     /**
@@ -300,7 +296,7 @@ public class SelectBuilder {
      */
     public SelectBuilder having(Condition condition) {
         this.havingCondition = condition;
-        return this;
+        return self();
     }
 
     /**
@@ -311,7 +307,7 @@ public class SelectBuilder {
      */
     public SelectBuilder orderBy(String... columns) {
         orderColumns.addAll(List.of(columns));
-        return this;
+        return self();
     }
 
     /**
@@ -321,12 +317,12 @@ public class SelectBuilder {
      * @throws IllegalStateException if order direction was already set
      */
     public SelectBuilder desc() {
-        if(orderDirection != null) {
+        if (orderDirection != null) {
             throw new IllegalStateException(ERROR_MESSAGE_MULTIPLE_ORDER_DIRECTION_CALLS);
         }
 
         orderDirection = "DESC";
-        return this;
+        return self();
     }
 
     /**
@@ -336,12 +332,12 @@ public class SelectBuilder {
      * @throws IllegalStateException if order direction was already set
      */
     public SelectBuilder asc() {
-        if(orderDirection != null) {
+        if (orderDirection != null) {
             throw new IllegalStateException(ERROR_MESSAGE_MULTIPLE_ORDER_DIRECTION_CALLS);
         }
 
         orderDirection = "ASC";
-        return this;
+        return self();
     }
 
     /**
@@ -352,7 +348,7 @@ public class SelectBuilder {
      */
     public SelectBuilder limit(int limit) {
         this.limit = limit < 1 ? -1 : limit;
-        return this;
+        return self();
     }
 
     /**
@@ -363,7 +359,7 @@ public class SelectBuilder {
      */
     public SelectBuilder offset(int offset) {
         this.offset = offset < 1 ? 0 : offset;
-        return this;
+        return self();
     }
 
     /**
@@ -372,18 +368,19 @@ public class SelectBuilder {
      * @return the constructed Query object
      * @throws IllegalStateException if no table was specified
      */
+    @Override
     public Query build() {
-        if(tables.isEmpty()) {
+        if (tables.isEmpty()) {
             throw new IllegalStateException("A table to select from must be specified");
         }
 
-        if(columns.isEmpty()) {
+        if (columns.isEmpty()) {
             columns.add("*");
         }
 
         StringJoiner statement = new StringJoiner(" ")
                 .add("SELECT");
-        if(distinct) {
+        if (distinct) {
             statement.add("DISTINCT");
         }
         statement.add(String.join(", ", columns))
@@ -393,9 +390,9 @@ public class SelectBuilder {
         joins.forEach(join -> statement.add(join.toSql(dialect, schema)));
 
         Condition whereCondition = null;
-        if(!conditions.isEmpty()) {
+        if (!conditions.isEmpty()) {
             statement.add("WHERE");
-            whereCondition = new Condition.CompositeCondition("AND", conditions);
+            whereCondition = new CompositeCondition("AND", conditions);
             statement.add(whereCondition.toSql());
         }
 
@@ -407,15 +404,15 @@ public class SelectBuilder {
             statement.add("HAVING").add(havingCondition.toSql());
         }
 
-        if(!orderColumns.isEmpty()) {
-            if(orderDirection == null) {
+        if (!orderColumns.isEmpty()) {
+            if (orderDirection == null) {
                 orderDirection = "DESC";
             }
 
             statement.add("ORDER BY").add(String.join(", ", orderColumns)).add(orderDirection);
         }
 
-        if(limit > -1) {
+        if (limit > -1) {
             statement.add(dialect.applyPaging(limit, offset));
         }
 
@@ -428,13 +425,5 @@ public class SelectBuilder {
             havingCondition.getParameters().forEach(query::addParameter);
         }
         return query;
-    }
-
-    private String addSchemaToTable(String table) {
-        if(schema == null || schema.isBlank()) {
-            return table;
-        }
-
-        return schema + "." + table;
     }
 }
