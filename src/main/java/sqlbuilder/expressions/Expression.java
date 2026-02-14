@@ -83,11 +83,11 @@ public class Expression {
         return new NotCondition(condition);
     }
 
-    public static Condition in(String column, List<String> values) {
+    public static Condition in(String column, List<Object> values) {
         return new InCondition(column, values);
     }
 
-    public static Condition in(String column, String... values) {
+    public static Condition in(String column, Object... values) {
         return in(column, List.of(values));
     }
 
