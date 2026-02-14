@@ -1,5 +1,8 @@
 package sqlbuilder.expressions;
 
+import sqlbuilder.SelectBuilder;
+import sqlbuilder.exceptions.ValueCannotBeEmptyException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +64,18 @@ public interface Condition {
 
         public Condition not(Condition condition) {
             return createCompositeCondition(Expression.not(condition));
+        }
+
+        public Condition in(String column, List<String> values) {
+            return createCompositeCondition(Expression.in(column, values));
+        }
+
+        public Condition in(String column, String... values) {
+            return in(column, List.of(values));
+        }
+
+        public Condition in(String column, SelectBuilder subQuery) {
+            return createCompositeCondition(Expression.in(column, subQuery));
         }
 
         private Condition createCompositeCondition(Condition expression) {
@@ -176,6 +191,50 @@ class NotCondition implements Condition {
     @Override
     public List<Object> getParameters() {
         return condition.getParameters();
+    }
+}
+
+class InCondition implements Condition {
+    private final String column;
+    private final List<String> values;
+    private final SelectBuilder subQuery;
+
+    public InCondition(String column, List<String> values) {
+        this.column = column;
+        this.values = values;
+        this.subQuery = null;
+    }
+
+    public InCondition(String column, String... values) {
+        this(column, List.of(values));
+    }
+
+    public InCondition(String column, SelectBuilder subQuery) {
+        this.column = column;
+        this.values = null;
+        this.subQuery = subQuery;
+    }
+
+    @Override
+    public String toSql() {
+        StringBuilder sql = new StringBuilder(column + " IN (");
+        if(values != null) {
+            if(values.isEmpty()) {
+                throw new ValueCannotBeEmptyException("IN-values");
+            }
+
+            sql.append(String.join(", ", values));
+        // no null check for sub query needed because only either values or subQuery can be null because of the constructor
+        } else {
+            //TODO: replace getStatement with method that fills the prepared statement with the actual values
+            sql.append(subQuery.build().getStatement());
+        }
+        return sql + ")";
+    }
+
+    @Override
+    public List<Object> getParameters() {
+        return List.of();
     }
 }
 
