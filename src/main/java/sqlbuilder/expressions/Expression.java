@@ -75,6 +75,10 @@ public class Expression {
         return new NotNullCondition(column);
     }
 
+    public static Condition not(Condition condition) {
+        return new NotCondition(condition);
+    }
+
     public static Condition brackets(Condition expression) {
         //TODO: Implement bracket support
         return null;

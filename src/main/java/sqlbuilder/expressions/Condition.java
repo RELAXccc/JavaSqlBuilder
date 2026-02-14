@@ -58,6 +58,10 @@ public interface Condition {
             return createCompositeCondition(Expression.isNull(column));
         }
 
+        public Condition not(Condition condition) {
+            return createCompositeCondition(Expression.not(condition));
+        }
+
         private Condition createCompositeCondition(Condition expression) {
             return new CompositeCondition(chainingOperator, leftCondition, expression);
         }
