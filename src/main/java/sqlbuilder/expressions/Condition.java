@@ -1,5 +1,6 @@
 package sqlbuilder.expressions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
@@ -68,8 +69,8 @@ public interface Condition {
     }
 
     class CompositeCondition implements Condition {
-        private String type;
-        private List<Condition> conditions;
+        private final String type;
+        private final List<Condition> conditions;
 
         public CompositeCondition(String type, Condition... conditions) {
             this.type = type;
@@ -123,7 +124,10 @@ class ComparisionCondition implements Condition {
 
     @Override
     public List<Object> getParameters() {
-        return List.of();
+        List<Object> params = new ArrayList<>();
+        column.addParameters(params);
+        comparisonValue.addParameters(params);
+        return params;
     }
 }
 
@@ -141,6 +145,7 @@ class NullCondition implements Condition {
 
     @Override
     public List<Object> getParameters() {
+        // IS NULL has no parameters
         return List.of();
     }
 }
@@ -157,7 +162,7 @@ class NotNullCondition extends NullCondition {
 }
 
 class NotCondition implements Condition {
-    private Condition condition;
+    private final Condition condition;
 
     public NotCondition(Condition condition) {
         this.condition = condition;
@@ -170,8 +175,7 @@ class NotCondition implements Condition {
 
     @Override
     public List<Object> getParameters() {
-        // do nothing
-        return List.of();
+        return condition.getParameters();
     }
 }
 
