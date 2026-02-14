@@ -1,17 +1,24 @@
 package sqlbuilder.integration;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.Db2Container;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import sqlbuilder.dialects.DB2Dialect;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.integration.util.DockerCheck;
 
-@Testcontainers
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 public class DB2IntegrationTest extends BaseIntegrationTest {
 
-    @Container
-    private static final Db2Container db2 = new Db2Container("icr.io/db2_community/db2:11.5.9.0")
-            .acceptLicense();
+    private static Db2Container db2;
+
+    @BeforeAll
+    static void startContainer() {
+        assumeTrue(DockerCheck.isDockerAvailable(), "Docker is not available, skipping DB2 integration test");
+        db2 = new Db2Container("icr.io/db2_community/db2:11.5.9.0")
+                .acceptLicense();
+        db2.start();
+    }
 
     @Override
     protected String getJdbcUrl() {

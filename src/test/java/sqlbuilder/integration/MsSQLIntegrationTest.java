@@ -1,17 +1,24 @@
 package sqlbuilder.integration;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import sqlbuilder.dialects.MsSQLDialect;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.integration.util.DockerCheck;
 
-@Testcontainers
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 public class MsSQLIntegrationTest extends BaseIntegrationTest {
 
-    @Container
-    private static final MSSQLServerContainer<?> mssql = new MSSQLServerContainer<>("mcr.microsoft.com/mssql/server:2017-latest")
-            .acceptLicense();
+    private static MSSQLServerContainer<?> mssql;
+
+    @BeforeAll
+    static void startContainer() {
+        assumeTrue(DockerCheck.isDockerAvailable(), "Docker is not available, skipping MsSQL integration test");
+        mssql = new MSSQLServerContainer<>("mcr.microsoft.com/mssql/server:2017-latest")
+                .acceptLicense();
+        mssql.start();
+    }
 
     @Override
     protected String getJdbcUrl() {

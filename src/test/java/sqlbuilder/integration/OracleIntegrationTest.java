@@ -1,16 +1,23 @@
 package sqlbuilder.integration;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.OracleContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import sqlbuilder.dialects.OracleDialect;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.integration.util.DockerCheck;
 
-@Testcontainers
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 public class OracleIntegrationTest extends BaseIntegrationTest {
 
-    @Container
-    private static final OracleContainer oracle = new OracleContainer("gvenzl/oracle-free:latest");
+    private static OracleContainer oracle;
+
+    @BeforeAll
+    static void startContainer() {
+        assumeTrue(DockerCheck.isDockerAvailable(), "Docker is not available, skipping Oracle integration test");
+        oracle = new OracleContainer("gvenzl/oracle-free:latest");
+        oracle.start();
+    }
 
     @Override
     protected String getJdbcUrl() {

@@ -1,16 +1,23 @@
 package sqlbuilder.integration;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import sqlbuilder.dialects.PostgresDialect;
 import sqlbuilder.dialects.SqlDialect;
+import sqlbuilder.integration.util.DockerCheck;
 
-@Testcontainers
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 public class PostgresIntegrationTest extends BaseIntegrationTest {
 
-    @Container
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+    private static PostgreSQLContainer<?> postgres;
+
+    @BeforeAll
+    static void startContainer() {
+        assumeTrue(DockerCheck.isDockerAvailable(), "Docker is not available, skipping Postgres integration test");
+        postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+        postgres.start();
+    }
 
     @Override
     protected String getJdbcUrl() {

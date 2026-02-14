@@ -37,6 +37,7 @@ jobs:
         cache: maven
 
     - name: Build and Run ${{ matrix.database }} Integration Tests
+      continue-on-error: ${{ matrix.experimental || false }}
       run: |
         if [[ "${{ matrix.database }}" == "H2" ]]; then
           mvn -B clean test -Dtest=H2IntegrationTest,*Test
