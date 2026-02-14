@@ -7,9 +7,9 @@ import sqlbuilder.expressions.Condition;
 import java.util.*;
 
 public class SelectBuilder {
-    public static final String ERROR_MESSAGE_MULTIPLE_ORDER_DIRECTION_CALLS = "order direction can only be set once. Multiple calls of desc() or asc() are not allowed!";
-    private final SqlDialect DIALECT;
-    private final String SCHEMA;
+    private static final String ERROR_MESSAGE_MULTIPLE_ORDER_DIRECTION_CALLS = "order direction can only be set once. Multiple calls of desc() or asc() are not allowed!";
+    private final SqlDialect dialect;
+    private final String schema;
 
     private final List<String> columns = new ArrayList<>();
     private final List<String> tables = new ArrayList<>();
@@ -29,8 +29,8 @@ public class SelectBuilder {
     }
 
     public SelectBuilder(SqlDialect dialect, String schema) {
-        this.DIALECT = dialect;
-        this.SCHEMA = schema;
+        this.dialect = dialect;
+        this.schema = schema;
     }
 
     public SelectBuilder select(String... columns) {
@@ -39,7 +39,7 @@ public class SelectBuilder {
         }
 
         Arrays.stream(columns)
-                .map(DIALECT::quote)
+                .map(dialect::quote)
                 .forEach(this.columns::add);
         return this;
     }
@@ -88,7 +88,7 @@ public class SelectBuilder {
 
     public SelectBuilder join(String table, Condition joinCondition) {
         tablesContext.add(table);
-        table = this.DIALECT.formatTableIdentifier(table, tablesContext);
+        table = addSchemaToTable(this.dialect.formatTableIdentifier(table, tablesContext));
         StringJoiner join = new StringJoiner(" ")
                 .add("JOIN");
         join.add(table)
@@ -103,7 +103,7 @@ public class SelectBuilder {
         tablesContext.add(table);
         StringJoiner join = new StringJoiner(" ")
                 .add("JOIN");
-        join.add(table)
+        join.add(addSchemaToTable(table))
                 .add(alias)
                 .add("ON")
                 .add(joinCondition.toSql());
@@ -205,17 +205,17 @@ public class SelectBuilder {
         }
 
         if(limit > -1) {
-            statement.add(DIALECT.applyPaging(limit, offset));
+            statement.add(dialect.applyPaging(limit, offset));
         }
 
         return new Query(statement.toString());
     }
 
     private String addSchemaToTable(String table) {
-        if(SCHEMA == null || SCHEMA.isBlank()) {
+        if(schema == null || schema.isBlank()) {
             return table;
         }
 
-        return SCHEMA + "." + table;
+        return schema + "." + table;
     }
 }
