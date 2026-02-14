@@ -66,11 +66,11 @@ public interface Condition {
             return createCompositeCondition(Expression.not(condition));
         }
 
-        public Condition in(String column, List<String> values) {
+        public Condition in(String column, List<Object> values) {
             return createCompositeCondition(Expression.in(column, values));
         }
 
-        public Condition in(String column, String... values) {
+        public Condition in(String column, Object... values) {
             return in(column, List.of(values));
         }
 
@@ -196,16 +196,16 @@ class NotCondition implements Condition {
 
 class InCondition implements Condition {
     private final String column;
-    private final List<String> values;
+    private final List<Object> values;
     private final SelectBuilder subQuery;
 
-    public InCondition(String column, List<String> values) {
+    public InCondition(String column, List<Object> values) {
         this.column = column;
         this.values = values;
         this.subQuery = null;
     }
 
-    public InCondition(String column, String... values) {
+    public InCondition(String column, Object... values) {
         this(column, List.of(values));
     }
 
@@ -223,7 +223,7 @@ class InCondition implements Condition {
                 throw new ValueCannotBeEmptyException("IN-values");
             }
 
-            sql.append(String.join(", ", values));
+            sql.append(values.stream().map(v -> "?").collect(Collectors.joining(", ")));
         // no null check for sub query needed because only either values or subQuery can be null because of the constructor
         } else {
             //TODO: replace getStatement with method that fills the prepared statement with the actual values
@@ -234,7 +234,10 @@ class InCondition implements Condition {
 
     @Override
     public List<Object> getParameters() {
-        return List.of();
+        if(values != null) {
+            return values;
+        }
+        return subQuery.build().getParameters();
     }
 }
 
