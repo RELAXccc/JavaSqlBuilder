@@ -1,7 +1,8 @@
 # JavaSqlBuilder
 
 [![Build Status](https://github.com/RELAXccc/JavaSqlBuilder/actions/workflows/maven.yml/badge.svg)](https://github.com/RELAXccc/JavaSqlBuilder/actions)
-[![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](#development)
+![Coverage](.github/badges/jacoco.svg)
+![Branches](.github/badges/branches.svg)
 [Deutsch](README_DE.md)
 
 > 🚧 **Work In Progress**: This project is still under active development and not yet stable.
