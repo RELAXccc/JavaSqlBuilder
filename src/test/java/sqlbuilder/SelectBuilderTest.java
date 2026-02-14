@@ -108,7 +108,37 @@ class SelectBuilderTest {
                 .from("users", "u")
                 .join("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
                 .build();
-        assertEquals("SELECT \"u.name\", \"o.order_date\" FROM users u JOIN orders o ON u.id = o.user_id", query.getStatement());
+        assertEquals("SELECT \"u.name\", \"o.order_date\" FROM users u INNER JOIN orders o ON u.id = o.user_id", query.getStatement());
+    }
+
+    @Test
+    void testLeftJoin() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        Query query = builder.select("u.name", "o.id")
+                .from("users", "u")
+                .leftJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
+                .build();
+        assertEquals("SELECT \"u.name\", \"o.id\" FROM users u LEFT JOIN orders o ON u.id = o.user_id", query.getStatement());
+    }
+
+    @Test
+    void testRightJoin() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        Query query = builder.select("u.name", "o.id")
+                .from("users", "u")
+                .rightJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
+                .build();
+        assertEquals("SELECT \"u.name\", \"o.id\" FROM users u RIGHT JOIN orders o ON u.id = o.user_id", query.getStatement());
+    }
+
+    @Test
+    void testFullJoin() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        Query query = builder.select("u.name", "o.id")
+                .from("users", "u")
+                .fullJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
+                .build();
+        assertEquals("SELECT \"u.name\", \"o.id\" FROM users u FULL OUTER JOIN orders o ON u.id = o.user_id", query.getStatement());
     }
 
     @Test
@@ -151,6 +181,95 @@ class SelectBuilderTest {
                 .join("order_items", "oi", Expression.eq("o.id", Expression.column("oi.order_id")))
                 .join("products", "p", Expression.eq("oi.product_id", Expression.column("p.id")))
                 .build();
-        assertEquals("SELECT \"u.name\", \"o.id\", \"p.name\" FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id", query.getStatement());
+        assertEquals("SELECT \"u.name\", \"o.id\", \"p.name\" FROM users u INNER JOIN orders o ON u.id = o.user_id INNER JOIN order_items oi ON o.id = oi.order_id INNER JOIN products p ON oi.product_id = p.id", query.getStatement());
+    }
+
+    @Test
+    void testSchema() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect(), "myschema");
+        Query query = builder.from("users").build();
+        assertEquals("SELECT * FROM myschema.users", query.getStatement());
+    }
+
+    @Test
+    void testSchemaWithJoin() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect(), "myschema");
+        Query query = builder.from("users", "u")
+                .join("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
+                .build();
+        assertEquals("SELECT * FROM myschema.users u INNER JOIN myschema.orders o ON u.id = o.user_id", query.getStatement());
+    }
+
+    @Test
+    void testGroupBy() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        Query query = builder.select("department", "COUNT(*)")
+                .from("employees")
+                .groupBy("department")
+                .build();
+        assertEquals("SELECT \"department\", \"COUNT(*)\" FROM employees GROUP BY department", query.getStatement());
+    }
+
+    @Test
+    void testGroupByHaving() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        Query query = builder.select("department", "COUNT(*)")
+                .from("employees")
+                .groupBy("department")
+                .having(Expression.gt("COUNT(*)", 5))
+                .build();
+        assertEquals("SELECT \"department\", \"COUNT(*)\" FROM employees GROUP BY department HAVING COUNT(*) > ?", query.getStatement());
+        assertEquals(List.of(5), query.getParameters());
+    }
+
+    @Test
+    void testOrderByAsc() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        Query query = builder.from("users").orderBy("name").asc().build();
+        assertEquals("SELECT * FROM users ORDER BY name ASC", query.getStatement());
+    }
+
+    @Test
+    void testMultipleOrderByFails() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        builder.orderBy("name").asc();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, builder::desc);
+    }
+
+    @Test
+    void testNoTableFails() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    void testEmptyColumnsFails() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        org.junit.jupiter.api.Assertions.assertThrows(sqlbuilder.exceptions.ValueCannotBeEmptyException.class, () -> builder.select());
+    }
+
+    @Test
+    void testComplexJoinWithWhereAndGroupBy() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
+        Query query = builder.select("u.name", "SUM(o.amount)")
+                .from("users", "u")
+                .leftJoin("orders", "o", Expression.eq("u.id", Expression.column("o.user_id")))
+                .where(Expression.eq("u.status", "active"))
+                .groupBy("u.name")
+                .having(Expression.gt("SUM(o.amount)", 1000))
+                .orderBy("u.name").asc()
+                .limit(10)
+                .build();
+        
+        String expected = "SELECT \"u.name\", \"SUM(o.amount)\" FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE u.status = ? GROUP BY u.name HAVING SUM(o.amount) > ? ORDER BY u.name ASC LIMIT 10 OFFSET 0";
+        assertEquals(expected, query.getStatement());
+        assertEquals(List.of("active", 1000), query.getParameters());
+    }
+
+    @Test
+    void testH2DialectPaging() {
+        SelectBuilder builder = new SelectBuilder(new SqlDialect.H2Dialect());
+        Query query = builder.from("users").limit(10).offset(20).build();
+        assertEquals("SELECT * FROM users LIMIT 10 OFFSET 20", query.getStatement());
     }
 }
