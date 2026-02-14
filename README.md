@@ -1,5 +1,9 @@
 # JavaSqlBuilder
 
+[Deutsch](README_DE.md)
+
+> 🚧 **Work In Progress**: This project is still under active development and not yet stable.
+
 JavaSqlBuilder is a lightweight, fluent API library for Java 21 designed to construct SQL queries programmatically. It provides a type-safe and readable way to build complex SELECT statements, handling various SQL dialects and preventing common syntax errors.
 
 ## Features
@@ -41,7 +45,7 @@ SelectBuilder builder = new SelectBuilder(new SqlDialect.PostgresDialect());
 ```
 
 ### 2. Basic Select Query
-Define columns and the source table. If no columns are specified, `*` is used by default.
+Define columns and the source table. If no columns are specified, `*` is used by default. Use `selectDistinct` for unique results.
 
 ```java
 Query query = builder
@@ -49,12 +53,12 @@ Query query = builder
     .from("users")
     .build();
 
-System.out.println(query.getStatement()); 
-// Output: SELECT "id", "username", "email" FROM users
+// For distinct results:
+builder.selectDistinct("role").from("users");
 ```
 
 ### 3. Complex Where Clauses
-Use the `Expression` utility to create conditions. Conditions can be chained using `.and()` or `.or()`.
+Use the `Expression` utility to create conditions. Conditions can be chained using `.and()` or `.or()`. You can also check for `NULL` values.
 
 ```java
 import sqlbuilder.expressions.Expression;
@@ -64,6 +68,10 @@ builder.select("name")
        .where(Expression.eq("department", "IT")
            .and().gt("salary", 50000)
            .or().eq("role", "Admin"));
+
+// Null checks:
+builder.where(Expression.isNull("deleted_at"))
+       .where(Expression.isNotNull("email"));
 ```
 
 ### 4. Joins
