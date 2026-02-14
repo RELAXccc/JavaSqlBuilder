@@ -1,5 +1,7 @@
 # JavaSqlBuilder
 
+[![Build Status](https://github.com/RELAXccc/JavaSqlBuilder/actions/workflows/maven.yml/badge.svg)](https://github.com/RELAXccc/JavaSqlBuilder/actions)
+[![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](#development)
 [Deutsch](README_DE.md)
 
 > 🚧 **Work In Progress**: This project is still under active development and not yet stable.
@@ -103,6 +105,20 @@ builder.from("products")
        .limit(10)
        .offset(20);
 ```
+
+## Development
+
+### Running Tests & Coverage
+This project uses JaCoCo for test coverage reporting. To run tests and generate a report:
+
+```bash
+mvn clean test
+```
+
+The coverage report can then be found at: `target/site/jacoco/index.html`.
+
+### Project Context
+For AI-assisted development, a `GEMINI.md` file is used to provide project-specific context. This file is ignored by git to allow for local customization.
 
 ## Architecture Overview
 

@@ -38,3 +38,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Gemini CLI context
+GEMINI.md
+
+# JaCoCo coverage reports
+*.exec
+target/site/jacoco/
