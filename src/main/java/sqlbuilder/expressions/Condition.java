@@ -27,31 +27,39 @@ public interface Condition {
         }
 
         public Condition eq(String column, Object value) {
-            return new CompositeCondition(chainingOperator, leftCondition, Expression.eq(column, value));
+            return createCompositeCondition(Expression.eq(column, value));
         }
 
         public Condition neq(String column, Object value) {
-            return new CompositeCondition(chainingOperator, leftCondition, Expression.neq(column, value));
+            return createCompositeCondition(Expression.neq(column, value));
         }
 
         public Condition lt(String column, Object value) {
-            return new CompositeCondition(chainingOperator, leftCondition, Expression.lt(column, value));
+            return createCompositeCondition(Expression.lt(column, value));
         }
 
         public Condition leq(String column, Object value) {
-            return new CompositeCondition(chainingOperator, leftCondition, Expression.leq(column, value));
+            return createCompositeCondition(Expression.leq(column, value));
         }
 
         public Condition gt(String column, Object value) {
-            return new CompositeCondition(chainingOperator, leftCondition, Expression.gt(column, value));
+            return createCompositeCondition(Expression.gt(column, value));
         }
 
         public Condition geq(String column, Object value) {
-            return new CompositeCondition(chainingOperator, leftCondition, Expression.geq(column, value));
+            return createCompositeCondition(Expression.geq(column, value));
         }
 
         public Condition like(String column, Object value) {
-            return new CompositeCondition(chainingOperator, leftCondition, Expression.like(column, value));
+            return createCompositeCondition(Expression.like(column, value));
+        }
+
+        public Condition isNull(String column) {
+            return createCompositeCondition(Expression.isNull(column));
+        }
+
+        private Condition createCompositeCondition(Condition expression) {
+            return new CompositeCondition(chainingOperator, leftCondition, expression);
         }
     }
 
@@ -141,6 +149,25 @@ class NotNullCondition extends NullCondition {
     @Override
     public String toSql() {
         return column + "IS NOT NULL";
+    }
+}
+
+class NotCondition implements Condition {
+    private Condition condition;
+
+    public NotCondition(Condition condition) {
+        this.condition = condition;
+    }
+
+    @Override
+    public String toSql() {
+        return "NOT " + condition.toSql();
+    }
+
+    @Override
+    public List<Object> getParameters() {
+        // do nothing
+        return List.of();
     }
 }
 
